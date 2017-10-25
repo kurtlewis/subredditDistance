@@ -1,30 +1,28 @@
 class Log:
     """ Object containing configuration and data for logging."""
-    filename = './log.txt'
-    output
-    size = 200
-    linesSinceLastLog
 
     def __init__(self, filename, size):
         self.filename = filename
         self.size = size
-        output = list()
-        linesSinceLastLog = 0
+        # Treat output like queue, but it is implemented as a list
+        self.output = list()
+        self.linesSinceLastLog = 0
 
     def log(self, strToLog):
-        output.append(strToLog)
-        linesSinceLastLog += 1
+        self.output.append(strToLog)
+        self.linesSinceLastLog += 1
 
-        if output.size > size:
-            output.popLeft()
+        if len(self.output) > self.size:
+            self.output.pop(0)
 
     def writeToFile(self):
-        file = open(filename, 'w')
-        file.writeLines(output)
+        file = open(self.filename, 'w')
+        for line in self.output:
+            file.write(line + '\n')
         file.close()
-        linesSinceLastLog = 0
+        self.linesSinceLastLog = 0
 
     def logAndAutoWrite(self, strToLog):
         self.log(strToLog)
-        if linesSinceLastLog >= size:
+        if self.linesSinceLastLog >= self.size:
             self.writeToFile()
