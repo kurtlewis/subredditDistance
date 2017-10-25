@@ -1,5 +1,5 @@
-# Wikipedia Game
-For calculating the distance between wikipedia pages
+# Subreddit relations
+For calculating how often reddit pages are linked between each other
 
 # Dependencies
 * mysql
