@@ -21,15 +21,25 @@ class Spider:
 
     def crawlForSubredditLinks(self, subreddit):
         """ Crawls from a starting point, adding to the queue any websites it finds """
+        # Check to see if the subreddit exists
+        try:
+            self.reddit.subreddits.search_by_name(subreddit, exact=True)
+        except Exception as e:
+            print(e)
+            # Subreddit doesn't exist, return a blank list
+            return list()
+        # Get top posts
         topPosts = self.reddit.subreddit(subreddit).top(limit=self.postLimit)
         results = list()
         for post in topPosts:
+            # Only expand comments if requested
             if self.expandComments:
+                # Only expand comments when it gives at least 5 more comments
                 post.comments.replace_more(threshold=5)
             comments = post.comments.list()
             for comment in comments:
                 if isinstance(comment, praw.models.MoreComments):
-                    # If expanding comments is not turned on, MoreComments 
+                    # If expanding comments is not turned on, MoreComments
                     # will create issues
                     continue
                 sub = self.extractSubreddit(comment.body)
@@ -56,4 +66,3 @@ class Spider:
         # Pop off top of queue and recursively call
         if len(queue) != 0:
             self.breadthFirstSubredditScan(queue.pop(0), queue=queue)
-        
