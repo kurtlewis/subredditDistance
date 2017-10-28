@@ -15,7 +15,7 @@ class Spider:
             print(Error)
         self.log = log.Log('./reddit-spider.log', 500)
         self.queue = list()
-        self.subredditRegex = re.compile('(/r/[a-zA-Z0-9_]*) ')
+        self.subredditRegex = re.compile('(/r/\S+)\s')
 
     def crawl(self, startingPoint):
         """ Crawls from a starting point, adding to the queue any websites it finds """
