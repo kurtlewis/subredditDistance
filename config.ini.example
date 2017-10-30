@@ -1,0 +1,5 @@
+[mysql]
+user=databaseUser
+password=databasePassword
+host=127.0.0.1
+database=databaseName
