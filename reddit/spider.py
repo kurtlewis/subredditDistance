@@ -32,6 +32,8 @@ class Spider:
         topPosts = self.reddit.subreddit(subreddit).top(limit=self.postLimit)
         results = list()
         for post in topPosts:
+            self.extractAllSubreddits(post.selftext, results)
+            self.extractAllSubreddits(post.title, results)
             # Only expand comments if requested
             if self.expandComments:
                 # Only expand comments when it gives at least 5 more comments
@@ -42,13 +44,18 @@ class Spider:
                     # If expanding comments is not turned on, MoreComments
                     # will create issues
                     continue
-                sub = self.extractSubreddit(comment.body)
-                if sub is not None:
-                    results.append(sub)
+                self.extractAllSubreddits(comment.body, results)
         return results
 
-    def extractSubreddit(self, commentStr):
-        result = self.subredditRegex.match(commentStr)
+    def extractAllSubreddits(self, text, results):
+        sub = self.extractSubreddit(text)
+        while sub is not None:
+            results.append(sub)
+            text = text.replace(sub, '', 1)
+            sub = self.extractSubreddit(text)
+
+    def extractSubreddit(self, text):
+        result = self.subredditRegex.match(text)
         if result is not None:
             # Found a link to a subreddit
             return result.group(1)
