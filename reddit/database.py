@@ -11,20 +11,30 @@ class DatabaseConnection:
                                            password=config['password'],
                                            host=config['host'],
                                            database=config['database'])
-        self.cursor = self.cnx.cursor()
 
         self.createTable(tableName)
+
+        self.subQuery = ("SELECT occurences FROM " + tableName + " "
+                         "WHERE from_sub=%s and to_sub=%s")
+
+        self.subUpdate = ("UPDATE " + tableName + " SET occurences = %s "
+                          "WHERE from_sub=%s and to_sub=%s")
+
+        self.subInsert = ("INSERT INTO " + tableName + " "
+                          "(from_sub, to_sub, occurences) "
+                          "VALUES (%s, %s, %s)")
 
     def createTable(self, tableName):
         tableCreateString = (
             " CREATE TABLE " + tableName + " ("
-            "  from_sub VARCHAR(21) NOT NULL,"
-            "  to_sub VARCHAR(21) NOT NULL,"
+            "  from_sub VARCHAR(22) NOT NULL,"
+            "  to_sub VARCHAR(22) NOT NULL,"
             "  occurences INT NOT NULL,"
-            "  PRIMARY KEY (from_sub)"
+            "  PRIMARY KEY (from_sub, to_sub)"
             ") Engine=InnoDB")
         try:
-            self.cursor.execute(tableCreateString)
+            cursor = self.cnx.cursor()
+            cursor.execute(tableCreateString)
         except mysql.connector.Error as err:
             if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
                 print('Table already exists')
@@ -45,6 +55,21 @@ class DatabaseConnection:
             raise Exception('mysql missing from config file')
 
         return db
+
+    def addSubredditLink(self, from_sub, to_sub):
+        cursor = self.cnx.cursor()
+        cursor.execute(self.subQuery, (from_sub, to_sub))
+
+        row = cursor.fetchone()
+        if row is not None:
+            print(row)
+            cursor.execute(self.subUpdate, (row[0] + 1, from_sub, to_sub))
+        else:
+            # no result, so insert sub
+            cursor.execute(self.subInsert, (from_sub, to_sub, 1))
+        self.cnx.commit()
+        if cursor.rowcount > 1:
+            raise Exception("More than one result returned: " + str(cursor.rowcount))
 
     def close(self):
         self.cnx.close()
