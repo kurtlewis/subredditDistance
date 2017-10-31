@@ -12,7 +12,12 @@ class DatabaseConnection:
                                            host=config['host'],
                                            database=config['database'])
 
-        self.createTable(tableName)
+        self.tableCreateString = (" CREATE TABLE " + tableName + " ("
+                                  "  from_sub VARCHAR(30) NOT NULL,"
+                                  "  to_sub VARCHAR(30) NOT NULL,"
+                                  "  occurences INT NOT NULL,"
+                                  "  PRIMARY KEY (from_sub, to_sub)"
+                                  ") Engine=InnoDB")
 
         self.subQuery = ("SELECT occurences FROM " + tableName + " "
                          "WHERE from_sub=%s and to_sub=%s")
@@ -24,17 +29,12 @@ class DatabaseConnection:
                           "(from_sub, to_sub, occurences) "
                           "VALUES (%s, %s, %s)")
 
-    def createTable(self, tableName):
-        tableCreateString = (
-            " CREATE TABLE " + tableName + " ("
-            "  from_sub VARCHAR(22) NOT NULL,"
-            "  to_sub VARCHAR(22) NOT NULL,"
-            "  occurences INT NOT NULL,"
-            "  PRIMARY KEY (from_sub, to_sub)"
-            ") Engine=InnoDB")
+        self.createTable()
+
+    def createTable(self):
         try:
             cursor = self.cnx.cursor()
-            cursor.execute(tableCreateString)
+            cursor.execute(self.tableCreateString)
         except mysql.connector.Error as err:
             if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
                 print('Table already exists')
@@ -62,14 +62,14 @@ class DatabaseConnection:
 
         row = cursor.fetchone()
         if row is not None:
-            print(row)
             cursor.execute(self.subUpdate, (row[0] + 1, from_sub, to_sub))
         else:
             # no result, so insert sub
             cursor.execute(self.subInsert, (from_sub, to_sub, 1))
+        # commit changes
         self.cnx.commit()
         if cursor.rowcount > 1:
-            raise Exception("More than one result returned: " + str(cursor.rowcount))
+            raise Exception("More than one result returned")
 
     def close(self):
         self.cnx.close()
