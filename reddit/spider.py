@@ -62,14 +62,16 @@ class Spider:
         else:
             return None
 
-    def breadthFirstSubredditScan(self, startingSubreddit, queue=list()):
-        print('Search started with ' + startingSubreddit)
-        results = self.crawlForSubredditLinks(startingSubreddit)
-        for link in results:
-            if link not in self.visitedSubreddits:
-                queue.append(link)
-                self.visitedSubreddits.add(link)
-            print(startingSubreddit + ' links to ' + link)
-        # Pop off top of queue and recursively call
-        if len(queue) != 0:
-            self.breadthFirstSubredditScan(queue.pop(0), queue=queue)
+    def breadthFirstSubredditScan(self, startingSubreddit, database):
+        queue = list()
+        queue.append(startingSubreddit)
+        while len(queue) > 0:
+            subreddit = queue.pop(0)
+            print('Search started with ' + subreddit)
+            results = self.crawlForSubredditLinks(subreddit)
+            for link in results:
+                if link not in self.visitedSubreddits:
+                    queue.append(link)
+                    self.visitedSubreddits.add(link)
+                print(subreddit + ' links to ' + link)
+                database.addSubredditLink(subreddit, link)
