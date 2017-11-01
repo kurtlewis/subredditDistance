@@ -1,6 +1,7 @@
 import praw
 from logger import log
 import re
+import time
 
 
 class Spider:
@@ -68,7 +69,7 @@ class Spider:
         queue.append(startingSubreddit)
         while len(queue) > 0:
             subreddit = queue.pop(0)
-            print('[Queue:' + str(len(queue)) + ']Searching' + subreddit)
+            print('[Queue:' + str(len(queue)) + ']Searching ' + subreddit)
             try:
                 results = self.crawlForSubredditLinks(subreddit)
                 for link in results:
@@ -79,4 +80,8 @@ class Spider:
             except Exception as err:
                 # Error, this subreddit won't be hit
                 print("Error: " + str(err))
+                # Temporary fix - sleep in case it was an internet issue
+                # hopefully the issue will resolve itself
+                raise err
+                time.sleep(60)
             
