@@ -13,8 +13,8 @@ class DatabaseConnection:
                                            database=config['database'])
 
         self.tableCreateString = (" CREATE TABLE " + tableName + " ("
-                                  "  from_sub VARCHAR(30) NOT NULL,"
-                                  "  to_sub VARCHAR(30) NOT NULL,"
+                                  "  from_sub VARCHAR(35) NOT NULL,"
+                                  "  to_sub VARCHAR(35) NOT NULL,"
                                   "  occurences INT NOT NULL,"
                                   "  PRIMARY KEY (from_sub, to_sub)"
                                   ") Engine=InnoDB")
@@ -65,7 +65,12 @@ class DatabaseConnection:
             cursor.execute(self.subUpdate, (row[0] + 1, from_sub, to_sub))
         else:
             # no result, so insert sub
-            cursor.execute(self.subInsert, (from_sub, to_sub, 1))
+            try:
+                cursor.execute(self.subInsert, (from_sub, to_sub, 1))
+            except mysql.connector.errors.DataError as err:
+                # the subreddit name is probably too long for the table - skip this subreddit
+                print("Error: " + str(err))
+
         # commit changes
         self.cnx.commit()
         if cursor.rowcount > 1:

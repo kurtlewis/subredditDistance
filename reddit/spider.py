@@ -5,7 +5,8 @@ import re
 
 class Spider:
 
-    def __init__(self, postLimit=100, expandComments=True):
+    def __init__(self, databaseCnx, postLimit=100, expandComments=True):
+        self.dbCnx = databaseCnx
         self.postLimit = postLimit
         self.expandComments = expandComments
         self.reddit = object()
@@ -62,16 +63,20 @@ class Spider:
         else:
             return None
 
-    def breadthFirstSubredditScan(self, startingSubreddit, database):
+    def breadthFirstSubredditScan(self, startingSubreddit):
         queue = list()
         queue.append(startingSubreddit)
         while len(queue) > 0:
             subreddit = queue.pop(0)
-            print('Search started with ' + subreddit)
-            results = self.crawlForSubredditLinks(subreddit)
-            for link in results:
-                if link not in self.visitedSubreddits:
-                    queue.append(link)
-                    self.visitedSubreddits.add(link)
-                print(subreddit + ' links to ' + link)
-                database.addSubredditLink(subreddit, link)
+            print('[Queue:' + str(len(queue)) + ']Searching' + subreddit)
+            try:
+                results = self.crawlForSubredditLinks(subreddit)
+                for link in results:
+                    if link not in self.visitedSubreddits:
+                        queue.append(link)
+                        self.visitedSubreddits.add(link)
+                    self.dbCnx.addSubredditLink(subreddit, link)
+            except Exception as err:
+                # Error, this subreddit won't be hit
+                print("Error: " + str(err))
+            
