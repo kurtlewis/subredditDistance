@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument('tableName', type=str, help='The name of the table to use')
 parser.add_argument('startingSubreddit', type=str, help='The subreddit to'
                     ' start BFS on.')
-parser.add_argument('postsPerSubreddit', type=int, nargs=1,
+parser.add_argument('postsPerSubreddit', type=int,
                     help='Number of posts per subreddit to be scanned')
 # parser.add_argument('-x', '--dontexpand', action='store_true',
 #                     help='Dont expand comments. Can greatly improve speed')
@@ -21,7 +21,7 @@ args = parser.parse_args()
 
 dbx = reddit.database.DatabaseConnection(args.tableName)
 
-spid = reddit.spider.Spider(dbx)#, postLimit=int(args.postsPerSubreddit))
+spid = reddit.spider.Spider(dbx, postLimit=args.postsPerSubreddit)
 
 spid.breadthFirstSubredditScan(args.startingSubreddit)
 
