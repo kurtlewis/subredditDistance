@@ -20,7 +20,8 @@ class Spider:
         self.visitedSubreddits = set()
 
     def crawlForSubredditLinks(self, subreddit):
-        """ Crawls from a starting point, adding to the queue any websites it finds """
+        """ Crawls from a starting point, adding to the queue
+         any websites it finds """
         # Check to see if the subreddit exists
         try:
             self.reddit.subreddits.search_by_name(subreddit, exact=True)
