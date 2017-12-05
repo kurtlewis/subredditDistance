@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+
 import argparse
-import reddit.database
-import reddit.spider
+import subredditDistance
 
 parser = argparse.ArgumentParser(
     description='Will BFS through reddit with starting subreddit, storing data'
@@ -19,9 +20,9 @@ parser.add_argument('postsPerSubreddit', type=int,
 
 args = parser.parse_args()
 
-dbx = reddit.database.DatabaseConnection(args.tableName)
+dbx = subredditDistance.DatabaseConnection(args.tableName)
 
-spid = reddit.spider.Spider(dbx, postLimit=args.postsPerSubreddit)
+spid = subredditDistance.Spider(dbx, postLimit=args.postsPerSubreddit)
 
 spid.breadthFirstSubredditScan(args.startingSubreddit)
 

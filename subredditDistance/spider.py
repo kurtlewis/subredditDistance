@@ -1,5 +1,4 @@
 import praw
-from logger import log
 import re
 import time
 
@@ -17,7 +16,6 @@ class Spider:
             print('Make sure you have a praw.ini file defined with a bot' +
                   'called "subredditDistance"')
             print(Error)
-        self.log = log.Log('./reddit-spider.log', 500)
         self.subredditRegex = re.compile('/r/([a-zA-Z0-9_]+)[\s|/]')
         self.visitedSubreddits = set()
 
