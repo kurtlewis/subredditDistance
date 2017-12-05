@@ -5,7 +5,6 @@ setup(name='subredditDistance',
       description='For calculating the distance between subreddits',
       url='https://github.com/kurtlewis/subredditDistance',
       author='Kurt Lewis',
-      author_email='Revisit',
       license='MIT',
       packages=['subredditDistance'],
       zip_safe=False)
