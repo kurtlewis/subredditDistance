@@ -18,6 +18,7 @@ class Spider:
             print(Error)
         self.subredditRegex = re.compile('/r/([a-zA-Z0-9_]+)[\s|/]')
         self.visitedSubreddits = set()
+        self.picklingUtil = None
 
     def crawlForSubredditLinks(self, subreddit):
         """ Crawls from a starting point, adding to the queue
@@ -63,10 +64,22 @@ class Spider:
         else:
             return None
 
+    def addPicklingUtil(self, picklingUtil):
+        self.picklingUtil = picklingUtil
+
     def breadthFirstSubredditScan(self, startingSubreddit):
+        # define descriptions of data structures that should be saved
+        descQueue = 'queue'
+        descVisitedSet = 'visitedSet'
         queue = list()
-        queue.append(startingSubreddit)
-        self.visitedSubreddits.add(startingSubreddit)
+        # if pickling is enabled, load from disk
+        if self.picklingUtil and self.picklingUtil.doesFileExist(descQueue) \
+           and self.picklingUtil.doesFileExist(descVisitedSet):
+            queue = self.picklingUtil.load(descQueue)
+            self.visitedSubreddits = self.picklingUtil.load(descVisitedSet)
+        else:
+            queue.append(startingSubreddit)
+            self.visitedSubreddits.add(startingSubreddit)
         while len(queue) > 0:
             subreddit = queue.pop(0)
             print('[Queue:' + str(len(queue)) + ']Searching ' + subreddit)
@@ -84,3 +97,8 @@ class Spider:
                 # hopefully the issue will resolve itself
                 # raise err
                 time.sleep(60)
+            # Write the queue and set to disk if pickling is enabled
+            if self.picklingUtil:
+                self.picklingUtil.pickle(queue, descQueue)
+                self.picklingUtil.pickle(self.visitedSubreddits,
+                                         descVisitedSet)

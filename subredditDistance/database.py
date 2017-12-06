@@ -4,7 +4,7 @@ from configparser import ConfigParser
 
 class DatabaseConnection:
 
-    def __init__(self, tableName):
+    def __init__(self, tableName, forceNewTable=True):
         self.tableName = tableName
         config = self.readConfigFile()
         self.cnx = mysql.connector.connect(user=config['user'],
@@ -13,8 +13,8 @@ class DatabaseConnection:
                                            database=config['database'])
 
         self.tableCreateString = (" CREATE TABLE " + tableName + " ("
-                                  "  from_sub VARCHAR(35) NOT NULL,"
-                                  "  to_sub VARCHAR(35) NOT NULL,"
+                                  "  from_sub VARCHAR(50) NOT NULL,"
+                                  "  to_sub VARCHAR(50) NOT NULL,"
                                   "  occurences INT NOT NULL,"
                                   "  PRIMARY KEY (from_sub, to_sub)"
                                   ") Engine=InnoDB")
@@ -29,12 +29,21 @@ class DatabaseConnection:
                           "(from_sub, to_sub, occurences) "
                           "VALUES (%s, %s, %s)")
 
-        self.createTable()
+        self.checkForTable = ("Select * "
+                              "FROM information_schema.tables "
+                              "WHERE TABLE_SCHEMA='" + config['database'] + "'"
+                              " AND TABLE_NAME='" + tableName + "' "
+                              "LIMIT 1;")
+        
+        self.createTable(forceNewTable)
 
-    def createTable(self):
+    def createTable(self, forceNewTable):
         try:
             cursor = self.cnx.cursor()
-            cursor.execute(self.tableCreateString)
+            cursor.execute(self.checkForTable)
+            cursor.fetchall()
+            if (cursor.rowcount == 0 or forceNewTable):
+                cursor.execute(self.tableCreateString)
         except mysql.connector.Error as err:
             if err.errno == mysql.connector.errorcode.ER_TABLE_EXISTS_ERROR:
                 print('Table already exists')
@@ -68,7 +77,8 @@ class DatabaseConnection:
             try:
                 cursor.execute(self.subInsert, (from_sub, to_sub, 1))
             except mysql.connector.errors.DataError as err:
-                # the subreddit name is probably too long for the table - skip this subreddit
+                # the subreddit name is probably too long for the table -
+                # skip this subreddit
                 print("Error: " + str(err))
 
         # commit changes
