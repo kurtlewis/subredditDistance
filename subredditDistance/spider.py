@@ -66,6 +66,7 @@ class Spider:
     def breadthFirstSubredditScan(self, startingSubreddit):
         queue = list()
         queue.append(startingSubreddit)
+        self.visitedSubreddits.add(startingSubreddit)
         while len(queue) > 0:
             subreddit = queue.pop(0)
             print('[Queue:' + str(len(queue)) + ']Searching ' + subreddit)
@@ -81,6 +82,5 @@ class Spider:
                 print("Error: " + str(err))
                 # Temporary fix - sleep in case it was an internet issue
                 # hopefully the issue will resolve itself
-                raise err
+                # raise err
                 time.sleep(60)
-            
