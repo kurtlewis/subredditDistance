@@ -28,8 +28,8 @@ class Spider:
             self.reddit.subreddits.search_by_name(subreddit, exact=True)
         except Exception as e:
             print(e)
-            # Subreddit doesn't exist, return a blank list
-            return list()
+            # Subreddit doesn't exist, return an empty dict
+            return dict()
         # Get top posts
         topPosts = self.reddit.subreddit(subreddit).top(limit=self.postLimit)
         results = dict()
