@@ -32,7 +32,7 @@ class Spider:
             return list()
         # Get top posts
         topPosts = self.reddit.subreddit(subreddit).top(limit=self.postLimit)
-        results = list()
+        results = dict()
         for post in topPosts:
             self.extractAllSubreddits(post.selftext, results)
             self.extractAllSubreddits(post.title, results)
@@ -52,7 +52,10 @@ class Spider:
     def extractAllSubreddits(self, text, results):
         sub = self.extractSubreddit(text)
         while sub is not None:
-            results.append(sub)
+            if sub in results:
+                results[sub] = results[sub] + 1
+            else:
+                results[sub] = 1
             text = text.replace(sub, '', 1)
             sub = self.extractSubreddit(text)
 
@@ -85,17 +88,18 @@ class Spider:
             print('[Queue:' + str(len(queue)) + ']Searching ' + subreddit)
             try:
                 results = self.crawlForSubredditLinks(subreddit)
-                for link in results:
+                for link, numLinks in results.items():
                     if link not in self.visitedSubreddits:
                         queue.append(link)
                         self.visitedSubreddits.add(link)
-                    self.dbCnx.addSubredditLink(subreddit, link)
+                    self.dbCnx.addSubredditLink(subreddit, link, numLinks)
             except Exception as err:
                 # Error, this subreddit won't be hit
                 print("Error: " + str(err))
                 # Temporary fix - sleep in case it was an internet issue
                 # hopefully the issue will resolve itself
                 # raise err
+                print("Sleeping, in the hopes it fixes itself.")
                 time.sleep(60)
             # Write the queue and set to disk if pickling is enabled
             if self.picklingUtil:

@@ -65,20 +65,19 @@ class DatabaseConnection:
 
         return db
 
-    def addSubredditLink(self, from_sub, to_sub):
+    def addSubredditLink(self, from_sub, to_sub, numLinks):
         cursor = self.cnx.cursor()
         cursor.execute(self.subQuery, (from_sub, to_sub))
-
         row = cursor.fetchone()
         if row is not None:
-            cursor.execute(self.subUpdate, (row[0] + 1, from_sub, to_sub))
+            cursor.execute(self.subUpdate, (row[0] + numLinks, from_sub, to_sub))
         else:
             # no result, so insert sub
             try:
-                cursor.execute(self.subInsert, (from_sub, to_sub, 1))
+                cursor.execute(self.subInsert, (from_sub, to_sub, numLinks))
             except mysql.connector.errors.DataError as err:
                 # the subreddit name is probably too long for the table -
-                # skip this subreddit
+                # skip this link
                 print("Error: " + str(err))
 
         # commit changes
