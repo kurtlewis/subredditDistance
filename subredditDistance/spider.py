@@ -31,7 +31,8 @@ class Spider:
             # Subreddit doesn't exist, return an empty dict
             return dict()
         # Get top posts
-        topPosts = self.reddit.subreddit(subreddit).top(limit=self.postLimit)
+        topPosts = self.reddit.subreddit(subreddit).top('all',
+                                                        limit=self.postLimit)
         results = dict()
         for post in topPosts:
             self.extractAllSubreddits(post.selftext, results)
