@@ -64,7 +64,7 @@ class Spider:
         result = self.subredditRegex.match(text)
         if result is not None:
             # Found a link to a subreddit
-            return result.group(1)
+            return result.group(1).lower()
         else:
             return None
 
