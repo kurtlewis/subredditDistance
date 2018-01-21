@@ -37,16 +37,17 @@ logFile.close()
 
 # Create database connection
 dbx = subredditDistance.DatabaseConnection(sys.argv[2], False)
-dbx.allRowsToLowerCase()
+# dbx.allRowsToLowerCase()
 
 # For each duplication, set the value of each link in the database to
 # itself divided by the total number of times that sub was duplicated
-# total = 0
-# for sub in subs.keys():
-#     if subs[sub] > 1:
-#         print(sub + ':' + str(subs[sub]))
-#         total = total + subs[sub]
-#         dbx.updateSubredditLink()
-# print(total)
+total = 0
+for sub in subs.keys():
+    if subs[sub] > 1:
+        print(sub + ':' + str(subs[sub]))
+        total = total + subs[sub]
+        # only run dedup action when this is explicitly uncommented
+        #dbx.deDupSubredditLink(sub, subs[sub])
+print(total)
 
 

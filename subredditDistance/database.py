@@ -22,6 +22,9 @@ class DatabaseConnection:
         self.subQuery = ("SELECT occurences FROM " + tableName + " "
                          "WHERE from_sub=%s and to_sub=%s")
 
+        self.subQueryByFromSub = ("SELECT * FROM " + tableName + " "
+                                  "WHERE from_sub=%s")
+
         self.subUpdate = ("UPDATE " + tableName + " SET occurences = %s "
                           "WHERE from_sub=%s and to_sub=%s")
 
@@ -97,14 +100,15 @@ class DatabaseConnection:
         # create cursor
         cursor = self.cnx.cursor()
         # find all links where from is the sub
-        cursor.execute(self.subQuery, (from_sub, '*'))
+        cursor.execute(self.subQueryByFromSub, (from_sub,))
         rows = cursor.fetchall()
+        print(str(len(rows)) + from_sub)
         for row in rows:
-            print(row)
-            #cursor.execute(self.subUpdate, ())
+            cursor.execute(self.subUpdate, (row[2]/numDuplications,
+                                            from_sub, row[1],))
 
         # commit changes
-        #self.cnx.commit()
+        self.cnx.commit()
 
     def allRowsToLowerCase(self):
         """
