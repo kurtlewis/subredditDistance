@@ -34,6 +34,11 @@ class DatabaseConnection:
                               "WHERE TABLE_SCHEMA='" + config['database'] + "'"
                               " AND TABLE_NAME='" + tableName + "' "
                               "LIMIT 1;")
+
+        self.queryAll = ("SELECT * FROM " + tableName + ";")
+
+        self.deleteRow = ("DELETE FROM " + tableName + " "
+                          "WHERE from_sub=%s and to_sub=%s and occurences=%s;")
         
         self.createTable(forceNewTable)
 
@@ -84,6 +89,36 @@ class DatabaseConnection:
         self.cnx.commit()
         if cursor.rowcount > 1:
             raise Exception("More than one result returned")
+
+    def deDupSubredditLink(self, from_sub, numDuplications):
+        """
+        Update a specfic entry in the database
+        """
+        # create cursor
+        cursor = self.cnx.cursor()
+        # find all links where from is the sub
+        cursor.execute(self.subQuery, (from_sub, '*'))
+        rows = cursor.fetchall()
+        for row in rows:
+            print(row)
+            #cursor.execute(self.subUpdate, ())
+
+        # commit changes
+        #self.cnx.commit()
+
+    def allRowsToLowerCase(self):
+        """
+        Sets all table rows to lowercase - likely never needed
+        """
+        # Query for all rows
+        cursor = self.cnx.cursor()
+        cursor.execute(self.queryAll)
+        rows = cursor.fetchall()
+        for row in rows:
+            cursor.execute(self.deleteRow, (row[0], row[1], row[2]))
+            cursor.execute(self.subInsert, (row[0].lower(), row[1].lower(),
+                                            row[2]))
+        self.cnx.commit()
 
     def close(self):
         self.cnx.close()

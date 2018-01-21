@@ -11,11 +11,12 @@ The first step is going to be determining the scope of the problem.
 
 import re
 import sys
+import subredditDistance
 
 # The first step is using the log file to determine how many times each sub
 # was duplicated
-if (len(sys.argv) < 2):
-    raise Exception("Please input the name of the log file")
+if (len(sys.argv) < 3):
+    raise Exception("Please input the name of the log file and table name in that order")
 # create regex pattern
 regex = re.compile(r'Searching ([a-zA-Z0-9_]+)')
 # create dict for tracking appearances of each subreddit
@@ -34,10 +35,18 @@ for line in logFile:
 # close logfile
 logFile.close()
 
-# print out all subs that appear more than once
-total = 0
-for sub in subs.keys():
-    if subs[sub] > 1:
-        print(sub + ':' + str(subs[sub]))
-        total = total + subs[sub]
-print(total)
+# Create database connection
+dbx = subredditDistance.DatabaseConnection(sys.argv[2], False)
+dbx.allRowsToLowerCase()
+
+# For each duplication, set the value of each link in the database to
+# itself divided by the total number of times that sub was duplicated
+# total = 0
+# for sub in subs.keys():
+#     if subs[sub] > 1:
+#         print(sub + ':' + str(subs[sub]))
+#         total = total + subs[sub]
+#         dbx.updateSubredditLink()
+# print(total)
+
+
