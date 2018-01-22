@@ -23,14 +23,20 @@ regex = re.compile(r'Searching ([a-zA-Z0-9_]+)')
 subs = dict()
 # open the file and parse it
 logFile = open(sys.argv[1], 'r')
-for line in logFile:
+logFileLines = logFile.readlines()
+for lineNum, line in enumerate(logFileLines):
     match = re.search(regex, line)
     if match is not None:
         sub = match.group(1).lower()
-        if sub in subs:
-            subs[sub] = subs[sub] + 1
-        else:
-            subs[sub] = 1
+        # check to see if the next line starts with a [
+        if (lineNum + 1 < len(logFileLines) and
+            logFileLines[lineNum + 1].startswith('['))
+        or lineNum + 1 >= len(logFileLines):
+            # this sub was succesfully scanned - log it
+            if sub in subs:
+                subs[sub] = subs[sub] + 1
+            else:
+                subs[sub] = 1
 
 # close logfile
 logFile.close()
