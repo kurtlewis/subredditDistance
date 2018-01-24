@@ -29,9 +29,9 @@ for lineNum, line in enumerate(logFileLines):
     if match is not None:
         sub = match.group(1).lower()
         # check to see if the next line starts with a [
-        if (lineNum + 1 < len(logFileLines) and
+        if ((lineNum + 1 < len(logFileLines) and
             logFileLines[lineNum + 1].startswith('['))
-        or lineNum + 1 >= len(logFileLines):
+           or lineNum + 1 >= len(logFileLines)):
             # this sub was succesfully scanned - log it
             if sub in subs:
                 subs[sub] = subs[sub] + 1
@@ -42,7 +42,8 @@ for lineNum, line in enumerate(logFileLines):
 logFile.close()
 
 # Create database connection
-dbx = subredditDistance.DatabaseConnection(sys.argv[2], False)
+# ENABLE THIS TO ACTUALLY DEDUP
+# dbx = subredditDistance.DatabaseConnection(sys.argv[2], False)
 # dbx.allRowsToLowerCase()
 
 # For each duplication, set the value of each link in the database to
